@@ -1,0 +1,6 @@
+node_modules/
+.venv/
+out/
+cache.bin
+cache.json
+names.json

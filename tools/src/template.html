@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rabbitbot · Kaninchen Viewer</title>
+<style>/*CSS*/</style>
+</head>
+<body>
+<div id="app" data-theme="dark">
+  <canvas id="gl"></canvas>
+
+  <div id="loader">
+    <div class="loader-inner">
+      <svg class="loader-mark" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="27" class="ring-bg"/>
+        <circle cx="32" cy="32" r="27" class="ring-fg" id="loader-ring"/>
+      </svg>
+      <div class="loader-eyebrow">Kaninchen Viewer</div>
+      <div class="loader-title">Rabbitbot</div>
+      <div class="loader-status" id="loader-status">Unpacking model…</div>
+    </div>
+  </div>
+
+  <header id="brand">
+    <div class="eyebrow">Kaninchen Viewer</div>
+    <h1 id="model-title">Rabbitbot</h1>
+    <div class="stats" id="model-stats"></div>
+  </header>
+
+  <aside id="tree-panel" class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Components</span>
+      <span class="panel-sub" id="tree-count"></span>
+      <button class="icon-btn ghost" id="tree-collapse" title="Collapse all" data-icon="collapse"></button>
+    </div>
+    <label class="search">
+      <span data-icon="search"></span>
+      <input id="search" type="search" placeholder="Search parts, screws, part numbers…" autocomplete="off" spellcheck="false">
+      <kbd>/</kbd>
+    </label>
+    <div id="tree" role="tree"></div>
+  </aside>
+
+  <aside id="inspector" class="panel" hidden>
+    <div class="insp-head">
+      <div class="eyebrow" id="insp-kind"></div>
+      <button class="icon-btn ghost" id="insp-close" title="Clear selection (Esc)" data-icon="x"></button>
+    </div>
+    <h2 id="insp-name"></h2>
+    <button class="insp-parent" id="insp-parent" hidden></button>
+    <div class="insp-pn" id="insp-pn" hidden></div>
+    <dl id="insp-props"></dl>
+    <div class="insp-actions">
+      <button class="btn" id="act-focus"><span data-icon="focus"></span>Focus</button>
+      <button class="btn" id="act-isolate"><span data-icon="isolate"></span>Isolate</button>
+      <button class="btn" id="act-hide"><span data-icon="eyeoff"></span>Hide</button>
+    </div>
+  </aside>
+
+  <div id="isolate-chip" hidden>
+    <span data-icon="isolate"></span><span id="isolate-label"></span>
+    <button id="isolate-exit">Show all</button>
+  </div>
+
+  <div id="tooltip" hidden><div class="tt-name"></div><div class="tt-sub"></div></div>
+
+  <div id="tour-card" hidden>
+    <div class="tour-progress" id="tour-dots"></div>
+    <div class="eyebrow" id="tour-step"></div>
+    <h3 id="tour-title"></h3>
+    <p id="tour-text"></p>
+    <div class="tour-nav">
+      <button class="icon-btn" id="tour-prev" title="Previous (←)" data-icon="left"></button>
+      <button class="icon-btn" id="tour-play" title="Auto-play" data-icon="pause"></button>
+      <button class="icon-btn" id="tour-next" title="Next (→)" data-icon="right"></button>
+      <button class="btn subtle" id="tour-exit">Exit tour</button>
+    </div>
+  </div>
+
+  <div id="section-pop" class="pop" hidden>
+    <div class="pop-row">
+      <span class="pop-label">Axis</span>
+      <div class="seg" id="section-axis">
+        <button data-axis="x">X</button><button data-axis="y" class="on">Y</button><button data-axis="z">Z</button>
+      </div>
+      <button class="icon-btn ghost" id="section-flip" title="Flip side" data-icon="flip"></button>
+    </div>
+    <input type="range" id="section-range" min="0" max="1000" value="500">
+  </div>
+
+  <nav id="dock" class="panel">
+    <div class="dock-group">
+      <button class="dock-btn" id="btn-tree" title="Components panel" data-icon="list"></button>
+    </div>
+    <div class="dock-sep"></div>
+    <div class="dock-group explode">
+      <button class="dock-btn" id="btn-explode" title="Explode (E)" data-icon="explode"></button>
+      <input type="range" id="explode" min="0" max="1000" value="0" aria-label="Explode amount">
+    </div>
+    <div class="dock-sep"></div>
+    <div class="dock-group">
+      <button class="dock-btn" id="btn-section" title="Section cut (S)" data-icon="section"></button>
+      <button class="dock-btn" id="btn-xray" title="X-ray (X)" data-icon="xray"></button>
+      <button class="dock-btn" id="btn-rotate" title="Turntable (R)" data-icon="rotate"></button>
+    </div>
+    <div class="dock-sep"></div>
+    <div class="dock-group views">
+      <button class="dock-btn txt" data-view="iso" title="Isometric (1)">Iso</button>
+      <button class="dock-btn txt" data-view="front" title="Front (2)">Front</button>
+      <button class="dock-btn txt" data-view="side" title="Side (3)">Side</button>
+      <button class="dock-btn txt" data-view="top" title="Top (4)">Top</button>
+    </div>
+    <div class="dock-sep"></div>
+    <div class="dock-group">
+      <button class="dock-btn accent" id="btn-tour" title="Guided tour (T)" data-icon="play"><span>Tour</span></button>
+    </div>
+    <div class="dock-sep"></div>
+    <div class="dock-group">
+      <button class="dock-btn" id="btn-theme" title="Light / dark studio" data-icon="sun"></button>
+      <button class="dock-btn" id="btn-shot" title="Save screenshot (P)" data-icon="camera"></button>
+      <button class="dock-btn" id="btn-full" title="Fullscreen (F11)" data-icon="expand"></button>
+      <button class="dock-btn" id="btn-help" title="Shortcuts (?)" data-icon="help"></button>
+    </div>
+  </nav>
+
+  <div id="help" hidden>
+    <div class="help-card panel">
+      <div class="help-head"><h3>Controls</h3><button class="icon-btn ghost" id="help-close" data-icon="x"></button></div>
+      <div class="help-grid">
+        <div><kbd>Left drag</kbd><span>Orbit</span></div>
+        <div><kbd>Right drag</kbd><span>Pan</span></div>
+        <div><kbd>Scroll</kbd><span>Zoom to cursor</span></div>
+        <div><kbd>Click</kbd><span>Select part</span></div>
+        <div><kbd>Double-click</kbd><span>Focus part</span></div>
+        <div><kbd>E</kbd><span>Explode / collapse</span></div>
+        <div><kbd>S</kbd><span>Section cut</span></div>
+        <div><kbd>X</kbd><span>X-ray</span></div>
+        <div><kbd>I</kbd><span>Isolate selection</span></div>
+        <div><kbd>H</kbd><span>Hide selection</span></div>
+        <div><kbd>Shift H</kbd><span>Show everything</span></div>
+        <div><kbd>F</kbd><span>Frame selection</span></div>
+        <div><kbd>R</kbd><span>Turntable</span></div>
+        <div><kbd>T</kbd><span>Guided tour</span></div>
+        <div><kbd>1–4</kbd><span>Iso · Front · Side · Top</span></div>
+        <div><kbd>P</kbd><span>Screenshot</span></div>
+        <div><kbd>/</kbd><span>Search</span></div>
+        <div><kbd>Esc</kbd><span>Clear / close</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" hidden></div>
+</div>
+<script id="model-data" type="application/octet-stream">/*MODEL*/</script>
+<script>/*JS*/</script>
+</body>
+</html>

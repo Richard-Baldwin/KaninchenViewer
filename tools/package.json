@@ -1,0 +1,21 @@
+{
+  "name": "kaninchen-viewer-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds a standalone HTML viewer from a STEP assembly",
+  "type": "commonjs",
+  "scripts": {
+    "tessellate": "node --max-old-space-size=8000 extract.cjs",
+    "names": ".venv/Scripts/python names.py",
+    "data": "node build-data.mjs",
+    "html": "node build-html.mjs",
+    "build": "npm run data && npm run html"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "meshoptimizer": "^1.3.0",
+    "occt-import-js": "^0.0.23",
+    "three": "^0.186.1",
+    "three-mesh-bvh": "^0.9.15"
+  }
+}
